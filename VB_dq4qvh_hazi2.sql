@@ -40,11 +40,5 @@ SELECT
 FROM MaskedUgyfel;
 REVERT;
 
-SELECT 
-    LOGIN,
-    EMAIL,
-    NEV,
-    SZULEV,
-    NEM,
-    CIM
+SELECT *
 FROM MaskedUgyfel;
