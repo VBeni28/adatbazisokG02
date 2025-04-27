@@ -1,0 +1,50 @@
+CREATE TABLE MaskedUgyfel (
+    LOGIN NVARCHAR(255) PRIMARY KEY,
+    EMAIL NVARCHAR(255) NOT NULL,
+    NEV NVARCHAR(255) NOT NULL,
+    SZULEV INT NULL,
+    NEM NVARCHAR(1) NULL,
+    CIM NVARCHAR(255) NULL
+);
+
+INSERT INTO MaskedUgyfel (LOGIN, EMAIL, NEV, SZULEV, NEM, CIM)
+SELECT LOGIN, EMAIL, NEV, SZULEV, NEM, CIM FROM Ugyfel;
+
+
+ALTER TABLE MaskedUgyfel
+ALTER COLUMN EMAIL ADD MASKED WITH (FUNCTION = 'email()');
+
+
+ALTER TABLE MaskedUgyfel
+ALTER COLUMN NEV ADD MASKED WITH (FUNCTION = 'partial(1, "XXX", 1)');
+
+
+ALTER TABLE MaskedUgyfel
+ALTER COLUMN SZULEV ADD MASKED WITH (FUNCTION = 'random(1900, 2000)');
+
+
+IF EXISTS (SELECT * FROM sys.database_principals WHERE name = 'UgyfelDataReader')
+    DROP USER UgyfelDataReader;
+
+CREATE USER UgyfelDataReader WITHOUT LOGIN;
+GRANT SELECT ON MaskedUgyfel TO UgyfelDataReader;
+
+EXECUTE AS USER = 'UgyfelDataReader';
+SELECT 
+    LOGIN,
+    EMAIL,
+    NEV,
+    SZULEV,
+    NEM,
+    CIM
+FROM MaskedUgyfel;
+REVERT;
+
+SELECT 
+    LOGIN,
+    EMAIL,
+    NEV,
+    SZULEV,
+    NEM,
+    CIM
+FROM MaskedUgyfel;
